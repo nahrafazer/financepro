@@ -15,6 +15,37 @@ export default async function handler(req, res) {
   const text = message.text.trim();
 
   try {
+    if (text.toLowerCase() === '/todaydetails') {
+      const today = new Date().toISOString().split('T')[0];
+      const { data, error } = await supabase
+        .from('transaksi')
+        .select('*')
+        .eq('tanggal', today)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        await kirimKeTelegram(chatId, "📭 Belum ada transaksi tercatat untuk hari ini.");
+      } else {
+        let listDetail = `📝 *DETAIL TRANSAKSI HARI INI*\n\n`;
+        let totalMasuk = 0;
+        let totalKeluar = 0;
+
+        data.forEach((item, index) => {
+          const ikon = item.tipe === 'pendapatan' ? '🟢' : '🔴';
+          listDetail += `${index + 1}. ${ikon} *${item.keterangan}*\n     └ Rp ${item.nominal.toLocaleString('id-ID')}\n`;
+          
+          if (item.tipe === 'pendapatan') totalMasuk += Number(item.nominal);
+          else totalKeluar += Number(item.nominal);
+        });
+
+        listDetail += `\n━━━━━━━━━━━━━━━\n`;
+        listDetail += `💰 *Total Hari Ini: Rp ${(totalMasuk - totalKeluar).toLocaleString('id-ID')}*`;
+
+        await kirimKeTelegram(chatId, listDetail);
+      }
+    }
     // FITUR A: CEK TOTAL /total
     if (text.toLowerCase() === '/total') {
       const today = new Date().toISOString().split('T')[0];
