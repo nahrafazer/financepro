@@ -14,41 +14,18 @@ export default async function handler(req, res) {
   const chatId = message.chat.id;
   const text = message.text.trim();
 
+  // Helper untuk mendapatkan tanggal hari ini format YYYY-MM-DD (WIB)
+  const getTodayDate = () => {
+    const date = new Date();
+    date.setHours(date.getHours() + 7); // Penyesuaian ke WIB (UTC+7)
+    return date.toISOString().split('T')[0];
+  };
+
   try {
-    if (text.toLowerCase() === '/todaydetails') {
-      const today = new Date().toISOString().split('T')[0];
-      const { data, error } = await supabase
-        .from('transaksi')
-        .select('*')
-        .eq('tanggal', today)
-        .order('created_at', { ascending: true });
+    const today = getTodayDate();
 
-      if (error) throw error;
-
-      if (!data || data.length === 0) {
-        await kirimKeTelegram(chatId, "📭 Belum ada transaksi tercatat untuk hari ini.");
-      } else {
-        let listDetail = `📝 *DETAIL TRANSAKSI HARI INI*\n\n`;
-        let totalMasuk = 0;
-        let totalKeluar = 0;
-
-        data.forEach((item, index) => {
-          const ikon = item.tipe === 'pendapatan' ? '🟢' : '🔴';
-          listDetail += `${index + 1}. ${ikon} *${item.keterangan}*\n     └ Rp ${item.nominal.toLocaleString('id-ID')}\n`;
-          
-          if (item.tipe === 'pendapatan') totalMasuk += Number(item.nominal);
-          else totalKeluar += Number(item.nominal);
-        });
-
-        listDetail += `\n━━━━━━━━━━━━━━━\n`;
-        listDetail += `💰 *Total Hari Ini: Rp ${(totalMasuk - totalKeluar).toLocaleString('id-ID')}*`;
-
-        await kirimKeTelegram(chatId, listDetail);
-      }
-    }
-    // FITUR A: CEK TOTAL /total
+    // 1. FITUR: CEK TOTAL (/total)
     if (text.toLowerCase() === '/total') {
-      const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('transaksi')
         .select('tipe, nominal')
@@ -62,33 +39,73 @@ export default async function handler(req, res) {
         else keluar += Number(item.nominal);
       });
 
-      const laporan = `📊 *Laporan Hari Ini*\n\n` +
+      const laporan = `📊 *LAPORAN HARI INI*\n` +
+                      `📅 _${today}_\n\n` +
                       `🟢 Masuk: Rp ${masuk.toLocaleString('id-ID')}\n` +
                       `🔴 Keluar: Rp ${keluar.toLocaleString('id-ID')}\n` +
+                      `━━━━━━━━━━━━━━━\n` +
                       `💰 *Sisa: Rp ${(masuk - keluar).toLocaleString('id-ID')}*`;
 
       await sendTelegram(chatId, laporan);
     } 
+
+    // 2. FITUR BARU: DETAIL TRANSAKSI (/todaydetails)
+    else if (text.toLowerCase() === '/todaydetails') {
+      const { data, error } = await supabase
+        .from('transaksi')
+        .select('*')
+        .eq('tanggal', today)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        await sendTelegram(chatId, "📭 Belum ada transaksi tercatat hari ini.");
+      } else {
+        let listDetail = `📝 *DETAIL TRANSAKSI HARI INI*\n\n`;
+        let total = 0;
+
+        data.forEach((item, index) => {
+          const ikon = item.tipe === 'pendapatan' ? '🟢' : '🔴';
+          const nominal = Number(item.nominal);
+          listDetail += `${index + 1}. ${ikon} *${item.keterangan}*\n     └ Rp ${nominal.toLocaleString('id-ID')}\n`;
+          
+          total += (item.tipe === 'pendapatan' ? nominal : -nominal);
+        });
+
+        listDetail += `\n━━━━━━━━━━━━━━━\n`;
+        listDetail += `💰 *Saldo Akhir: Rp ${total.toLocaleString('id-ID')}*`;
+
+        await sendTelegram(chatId, listDetail);
+      }
+    }
     
-    // FITUR B: INPUT DATA (Contoh: "Makan Bakso 15000")
+    // 3. FITUR: INPUT DATA OTOMATIS (Contoh: "Makan Bakso 15000")
     else {
       const match = text.match(/(.+)\s(\d+)$/);
       if (match) {
         const keterangan = match[1];
         const nominal = parseInt(match[2]);
-        const tipe = (keterangan.toLowerCase().includes('gaji') || keterangan.toLowerCase().includes('bonus')) 
+        const tipe = /(gaji|bonus|masuk|pemasukan|income)/i.test(keterangan) 
                      ? 'pendapatan' : 'pengeluaran';
 
         const { error } = await supabase
           .from('transaksi')
-          .insert([{ keterangan, nominal, tipe, tanggal: new Date().toISOString().split('T')[0] }]);
+          .insert([{ 
+            keterangan, 
+            nominal, 
+            tipe, 
+            tanggal: today 
+          }]);
 
         if (error) throw error;
-        await sendTelegram(chatId, `✅ *Berhasil!*\n📝 ${keterangan}\n💰 Rp ${nominal.toLocaleString('id-ID')}\n📂 ${tipe}`);
+        await sendTelegram(chatId, `✅ *Berhasil Dicatat!*\n\n📝 ${keterangan}\n💰 Rp ${nominal.toLocaleString('id-ID')}\n📂 ${tipe}`);
       }
     }
+
     return res.status(200).send('ok');
   } catch (e) {
+    console.error(e);
     await sendTelegram(chatId, "⚠️ Terjadi kesalahan: " + e.message);
     return res.status(200).send('error');
   }
