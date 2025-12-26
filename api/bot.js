@@ -7,36 +7,60 @@ const supabase = createClient(
 );
 
 module.exports = async (req, res) => {
-  try {
-    const token = process.env.BOT_TOKEN;
-    if (!token) throw new Error("BOT_TOKEN is missing");
+  if (req.method !== 'POST') return res.status(200).send('Bot is ready!');
 
-    const bot = new Telegraf(token);
+  const bot = new Telegraf(process.env.BOT_TOKEN);
 
-    // Perintah Paling Dasar (Tanpa Database)
-    bot.command('ping', (ctx) => ctx.reply('Pong! Bot Berhasil Merespons.'));
+  // Helper untuk cek User
+  const getUsername = async (tgId) => {
+    const { data } = await supabase.from('users').select('username').eq('telegram', tgId.toString()).single();
+    return data ? data.username : null;
+  };
 
-    // Perintah Start dengan Cek Database
-    bot.start(async (ctx) => {
-      const tgId = ctx.from.id.toString();
-      const { data } = await supabase.from('users').select('username').eq('telegram', tgId);
-      
-      if (data && data.length > 0) {
-        ctx.reply(`Halo ${data[0].username}! Bot sudah terhubung ke database.`);
-      } else {
-        ctx.reply(`ID Telegram ${tgId} belum terdaftar di database.`);
+  bot.start((ctx) => ctx.reply('Bot Aktif! 🚀\n\nCara pakai:\n/expense [angka] [keterangan]\n/income [angka] [keterangan]\n/total\n/today'));
+
+  // Handler /expense & /income
+  bot.command(['expense', 'income'], async (ctx) => {
+    const username = await getUsername(ctx.from.id);
+    if (!username) return ctx.reply("❌ ID Telegram Anda belum terdaftar di database.");
+
+    const args = ctx.message.text.split(' ');
+    if (args.length < 3) return ctx.reply("Format salah! Contoh: /expense 50000 makan siang");
+
+    const tipe = ctx.message.text.includes('expense') ? 'pengeluaran' : 'pemasukan';
+    const nominal = parseFloat(args[1].replace(/[^0-9]/g, ''));
+    const keterangan = args.slice(2).join(' ');
+
+    const { error } = await supabase.from('moneytrack').insert([
+      { 
+        username: username, 
+        tipe: tipe, 
+        nominal: nominal, 
+        keterangan: keterangan, 
+        tanggal: new Date().toISOString().split('T')[0] 
       }
-    });
+    ]);
 
-    // Handle Update dari Telegram
-    if (req.method === 'POST') {
-      await bot.handleUpdate(req.body);
-      res.status(200).send('OK');
-    } else {
-      res.status(200).send('Bot is running...');
-    }
-  } catch (error) {
-    console.error("Error utama:", error.message);
-    res.status(500).send(error.message);
+    if (error) return ctx.reply("❌ Gagal menyimpan ke database.");
+    ctx.reply(`✅ Berhasil mencatat ${tipe}:\n💰 Rp${nominal.toLocaleString('id-ID')}\n📝 ${keterangan}`);
+  });
+
+  // Handler /total
+  bot.command('total', async (ctx) => {
+    const username = await getUsername(ctx.from.id);
+    if (!username) return;
+
+    const { data } = await supabase.from('moneytrack').select('nominal, tipe').eq('username', username);
+    const total = data.reduce((acc, curr) => curr.tipe === 'pemasukan' ? acc + Number(curr.nominal) : acc - Number(curr.nominal), 0);
+    
+    ctx.reply(`💰 Total Saldo @${username}:\nRp${total.toLocaleString('id-ID')}`);
+  });
+
+  try {
+    await bot.handleUpdate(req.body);
+    res.status(200).json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(200).send('OK');
   }
 };
