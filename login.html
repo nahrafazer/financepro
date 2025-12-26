@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MoneyTrack</title>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');</style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #0b0f1a;
+            --accent: #38bdf8;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(28, 37, 51, 0.65);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- Blob Background Effects --- */
+        .blobs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            filter: blur(80px);
+        }
+
+        .blob {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0.15;
+            animation: move 20s infinite alternate;
+        }
+
+        .blob-1 {
+            top: -10%;
+            left: -10%;
+            background: #3b82f6;
+            animation-duration: 15s;
+        }
+
+        .blob-2 {
+            bottom: -10%;
+            right: -10%;
+            background: #a855f7;
+            animation-duration: 20s;
+            animation-delay: -5s;
+        }
+
+        .blob-3 {
+            top: 40%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            background: #ec4899;
+            animation-duration: 25s;
+            animation-delay: -10s;
+        }
+
+        @keyframes move {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(100px, 100px) scale(1.2); }
+        }
+
+        /* --- Frosted Glass Card --- */
+        .login-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            padding: 3rem;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 420px;
+            border: 1px solid var(--border);
+            z-index: 10;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .brand-logo {
+            width: 50px;
+            height: 50px;
+            background: var(--accent);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg);
+            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.3);
+        }
+
+        h2 { margin: 0; font-size: 1.75rem; font-weight: 800; letter-spacing: -0.05em; }
+        p.subtitle { color: var(--text-dim); font-size: 0.9rem; margin-top: 8px; margin-bottom: 2.5rem; text-align: center; }
+
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 8px; font-size: 0.7rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
+        
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(56, 189, 248, 0.2);
+        }
+
+        button:hover { 
+            opacity: 0.9; 
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(56, 189, 248, 0.3);
+        }
+        
+        button:active { transform: translateY(0); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        #status { text-align: center; margin-top: 1.5rem; font-size: 0.875rem; min-height: 20px; font-weight: 600; }
+        
+        .footer-link { text-align: center; margin-top: 2.5rem; font-size: 0.875rem; color: var(--text-dim); }
+        .footer-link a { color: var(--accent); text-decoration: none; font-weight: 700; transition: color 0.2s; }
+        .footer-link a:hover { color: #7dd3fc; }
+    </style>
+</head>
+<body>
+
+    <!-- Animated Blobs -->
+    <div class="blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="login-card">
+        <div class="brand">
+            <div class="brand-logo"><i data-lucide="zap"></i></div>
+            <h2>MoneyTrack</h2>
+        </div>
+        
+        <p class="subtitle">Kelola arus kas dengan lebih estetik.</p>
+
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="Masukkan username" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="••••••••">
+        </div>
+
+        <button onclick="handleLogin()" id="btn-login">Masuk Sekarang</button>
+        
+        <p id="status"></p>
+
+        <div class="footer-link">
+            Belum punya akun? <a href="register.html">Daftar Gratis</a>
+        </div>
+    </div>
+
+    <script>
+        const _url = "https://uufpobwisjrocbyuzztx.supabase.co";
+        const _key = "sb_publishable_iOq63sd-3dE061qVRxFkYw_JNEHMaeV";
+        const supabaseClient = supabase.createClient(_url, _key);
+
+        async function handleLogin() {
+            const userInp = document.getElementById('username').value.trim();
+            const passInp = document.getElementById('password').value;
+            const status = document.getElementById('status');
+            const btn = document.getElementById('btn-login');
+
+            if (!userInp || !passInp) {
+                status.innerText = "Mohon isi semua kolom!";
+                status.style.color = "#f87171";
+                return;
+            }
+
+            btn.disabled = true;
+            status.innerText = "Memverifikasi...";
+            status.style.color = "#94a3b8";
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('username', userInp)
+                    .eq('password', passInp)
+                    .maybeSingle();
+
+                if (error) throw error;
+
+                if (!data) {
+                    status.innerText = "Username atau Password salah!";
+                    status.style.color = "#f87171";
+                    btn.disabled = false;
+                } else {
+                    status.innerText = "Login Berhasil!";
+                    status.style.color = "#4ade80";
+
+                    localStorage.setItem("current_user", data.username);
+                    localStorage.setItem("login_timestamp", Date.now().toString());
+                    
+                    setTimeout(() => {
+                        window.location.href = "index.html";
+                    }, 1200);
+                }
+            } catch (err) {
+                status.innerText = "Terjadi kesalahan sistem.";
+                status.style.color = "#f87171";
+                btn.disabled = false;
+            }
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>
