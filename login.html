@@ -51,30 +51,9 @@
             animation: move 20s infinite alternate;
         }
 
-        .blob-1 {
-            top: -10%;
-            left: -10%;
-            background: #3b82f6;
-            animation-duration: 15s;
-        }
-
-        .blob-2 {
-            bottom: -10%;
-            right: -10%;
-            background: #a855f7;
-            animation-duration: 20s;
-            animation-delay: -5s;
-        }
-
-        .blob-3 {
-            top: 40%;
-            left: 50%;
-            width: 300px;
-            height: 300px;
-            background: #ec4899;
-            animation-duration: 25s;
-            animation-delay: -10s;
-        }
+        .blob-1 { top: -10%; left: -10%; background: #3b82f6; animation-duration: 15s; }
+        .blob-2 { bottom: -10%; right: -10%; background: #a855f7; animation-duration: 20s; animation-delay: -5s; }
+        .blob-3 { top: 40%; left: 50%; width: 300px; height: 300px; background: #ec4899; animation-duration: 25s; animation-delay: -10s; }
 
         @keyframes move {
             from { transform: translate(0, 0) scale(1); }
@@ -100,7 +79,7 @@
             flex-direction: column;
             align-items: center;
             gap: 12px;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
         }
 
         .brand-logo {
@@ -116,7 +95,42 @@
         }
 
         h2 { margin: 0; font-size: 1.75rem; font-weight: 800; letter-spacing: -0.05em; }
-        p.subtitle { color: var(--text-dim); font-size: 0.9rem; margin-top: 8px; margin-bottom: 2.5rem; text-align: center; }
+        p.subtitle { color: var(--text-dim); font-size: 0.9rem; margin-top: 8px; margin-bottom: 0.5rem; text-align: center; }
+
+        /* --- User Count Badge --- */
+        .registration-stats {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 2rem;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .registration-stats .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
 
         .form-group { margin-bottom: 1.5rem; }
         label { display: block; margin-bottom: 8px; font-size: 0.7rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
@@ -130,6 +144,7 @@
             color: white;
             font-family: 'Inter', sans-serif;
             font-size: 1rem;
+            box-sizing: border-box;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -147,7 +162,7 @@
             color: var(--bg);
             border: none;
             border-radius: 14px;
-            font-weight: 800;
+            font-weight: 700;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s;
@@ -173,7 +188,6 @@
 </head>
 <body>
 
-    <!-- Animated Blobs -->
     <div class="blobs">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
@@ -182,23 +196,32 @@
 
     <div class="login-card">
         <div class="brand">
-            <div class="brand-logo"><i data-lucide="zap"></i></div>
-            <h2>MoneyTrack</h2>
+            <div class="brand-logo"><i data-lucide="wallet"></i></div>
+            <h2>UrMoneyTrack</h2>
         </div>
         
         <p class="subtitle">Kelola arus kas dengan lebih estetik.</p>
 
-        <div class="form-group">
-            <label>Username</label>
-            <input type="text" id="username" placeholder="Masukkan username" autocomplete="off">
+        <!-- Status Registrasi -->
+        <div class="registration-stats" id="reg-stats">
+            <span class="dot"></span>
+            <span id="user-count">Memuat data...</span>
         </div>
 
-        <div class="form-group">
-            <label>Password</label>
-            <input type="password" id="password" placeholder="••••••••">
-        </div>
+        <!-- Perubahan Utama: Membungkus input dalam form -->
+        <form id="loginForm" onsubmit="event.preventDefault(); handleLogin();">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="username" placeholder="Masukkan username" autocomplete="off">
+            </div>
 
-        <button onclick="handleLogin()" id="btn-login">Masuk Sekarang</button>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••••">
+            </div>
+
+            <button type="submit" id="btn-login">Login</button>
+        </form>
         
         <p id="status"></p>
 
@@ -211,6 +234,23 @@
         const _url = "https://uufpobwisjrocbyuzztx.supabase.co";
         const _key = "sb_publishable_iOq63sd-3dE061qVRxFkYw_JNEHMaeV";
         const supabaseClient = supabase.createClient(_url, _key);
+
+        // Fungsi untuk mengambil jumlah user
+        async function fetchUserCount() {
+            try {
+                const { count, error } = await supabaseClient
+                    .from('users')
+                    .select('*', { count: 'exact', head: true });
+
+                if (error) throw error;
+                
+                const countElement = document.getElementById('user-count');
+                countElement.innerText = `${count} akun telah daftar`;
+            } catch (err) {
+                console.error("Gagal mengambil jumlah user:", err);
+                document.getElementById('user-count').innerText = "Sudah banyak yang bergabung";
+            }
+        }
 
         async function handleLogin() {
             const userInp = document.getElementById('username').value.trim();
@@ -260,7 +300,11 @@
             }
         }
 
-        lucide.createIcons();
+        // Jalankan saat halaman dimuat
+        window.onload = () => {
+            lucide.createIcons();
+            fetchUserCount();
+        };
     </script>
 </body>
 </html>
