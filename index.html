@@ -10,7 +10,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            /* Palette Deep Navy Blue dengan Glassmorphism */
             --bg: #020617; 
             --sidebar-glass: rgba(15, 23, 42, 0.7);
             --card-glass: rgba(30, 41, 59, 0.4); 
@@ -34,11 +33,10 @@
             display: flex;
             height: 100vh;
             width: 100vw;
-            overflow: hidden; /* Desktop Fit-to-screen */
+            overflow: hidden;
             position: relative;
         }
 
-        /* --- Animated Blob Background (Biru Terang & Pink) --- */
         .blobs {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -59,7 +57,6 @@
             to { transform: translate(120px, 80px) scale(1.1); }
         }
 
-        /* --- Sidebar (Frosted Glass) --- */
         .sidebar {
             width: var(--sidebar-width);
             background: var(--sidebar-glass);
@@ -107,7 +104,6 @@
         }
         .btn-exit:hover { border-color: var(--danger); color: var(--danger); background: rgba(244, 63, 94, 0.05); }
 
-        /* --- Area Konten Utama --- */
         .main-container {
             flex: 1; display: flex; flex-direction: column;
             padding: 2.5rem 3rem; overflow: hidden; position: relative;
@@ -117,7 +113,6 @@
         .page-header h1 { margin: 0; font-size: 1.8rem; font-weight: 700; letter-spacing: -0.04em; }
         .page-header p { margin: 6px 0 0; color: var(--text-dim); font-size: 0.9rem; }
 
-        /* --- Statistik (Glass Cards) --- */
         .stats-grid {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; flex-shrink: 0; margin-bottom: 2rem;
         }
@@ -146,7 +141,6 @@
         }
         .page-view.active { display: flex; }
 
-        /* --- Glass Panel Components --- */
         .glass-panel {
             background: var(--card-glass); 
             backdrop-filter: blur(16px);
@@ -178,7 +172,6 @@
         }
         .btn-submit:hover { filter: brightness(1.15); transform: scale(1.02); }
 
-        /* --- Table Styling --- */
         .table-area { flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
         .table-area::-webkit-scrollbar { width: 5px; }
         .table-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
@@ -192,7 +185,6 @@
         td { padding: 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; transition: 0.2s; }
         tr:hover td { background: rgba(255,255,255,0.02); }
 
-        /* Gaya Sekat Tanggal */
         .date-separator {
             background: rgba(255, 255, 255, 0.03);
             border-bottom: 1px solid var(--border);
@@ -218,7 +210,6 @@
         .btn-action-del { background: transparent; color: var(--text-dim); border: none; cursor: pointer; padding: 10px; border-radius: 10px; transition: 0.2s; display: inline-flex; }
         .btn-action-del:hover { color: var(--danger); background: rgba(244, 63, 94, 0.1); }
 
-        /* --- Chart Layout --- */
         .charts-container {
             display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; flex: 1; min-height: 0;
         }
@@ -231,7 +222,18 @@
             box-shadow: 0 15px 45px rgba(0,0,0,0.3);
         }
 
-        /* --- Modal --- */
+        /* Highlight Card for Insights */
+        .insight-highlight {
+            grid-column: span 2;
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .insight-label { color: var(--text-dim); font-size: 0.85rem; font-weight: 500; }
+        .insight-value { color: var(--danger); font-size: 1.4rem; font-weight: 800; }
+
         #confirm-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(2, 6, 23, 0.8); backdrop-filter: blur(12px);
@@ -247,7 +249,6 @@
         .m-btn-cancel { background: rgba(255,255,255,0.05); color: #fff; }
         .m-btn-del { background: var(--danger); color: #fff; box-shadow: 0 8px 20px rgba(244, 63, 94, 0.2); }
 
-        /* --- Responsive --- */
         @media (max-width: 1024px) {
             body { flex-direction: column; overflow-y: auto; height: auto; }
             .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); height: auto; padding: 1.5rem; }
@@ -255,6 +256,7 @@
             .content-grid, .charts-container { grid-template-columns: 1fr; flex: none; gap: 1.5rem; }
             .stats-grid { grid-template-columns: 1fr; }
             .table-area { max-height: 500px; }
+            .insight-highlight { grid-column: span 1; }
         }
     </style>
 </head>
@@ -384,6 +386,22 @@
         <!-- CHARTS VIEW -->
         <div id="charts-view" class="page-view">
             <div class="charts-container">
+                <!-- NEW INSIGHT SECTION -->
+                <div class="chart-card insight-highlight">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="background: rgba(244, 63, 94, 0.1); padding: 12px; border-radius: 12px; color: var(--danger);">
+                            <i data-lucide="trending-down" style="width: 24px; height: 24px;"></i>
+                        </div>
+                        <div>
+                            <div class="insight-label">Rata-Rata Pengeluaran Harian(7 Hari Terakhir)</div>
+                            <div class="insight-value" id="avg-expense-weekly">Rp 0</div>
+                        </div>
+                    </div>
+                    <!-- <div style="text-align: right; opacity: 0.5;">
+                        <i data-lucide="info" style="width: 16px;"></i>
+                    </div> -->
+                </div>
+
                 <div class="chart-card">
                     <div class="card-head" style="background:none; border:none; padding-bottom: 1rem;">
                         <h3 style="color: var(--success)">Pendapatan (7 Hari Terakhir)</h3>
@@ -555,7 +573,6 @@
             const incomeByDate = {};
             const expenseByDate = {};
             
-            // Map data yang ada
             data.forEach(item => {
                 const dateKey = item.tanggal;
                 if (item.tipe === 'pemasukan') {
@@ -565,7 +582,6 @@
                 }
             });
 
-            // Generate Array 7 Hari Terakhir
             const last7Days = [];
             for (let i = 6; i >= 0; i--) {
                 const d = new Date();
@@ -580,6 +596,11 @@
 
             const incomeValues = last7Days.map(d => incomeByDate[d] || 0);
             const expenseValues = last7Days.map(d => expenseByDate[d] || 0);
+
+            // LOGIKA HITUNG RATA-RATA PENGELUARAN MINGGUAN
+            const totalExpense7Days = expenseValues.reduce((a, b) => a + b, 0);
+            const avgExpense = totalExpense7Days / 7;
+            document.getElementById('avg-expense-weekly').innerText = `Rp ${Math.round(avgExpense).toLocaleString('id-ID')}`;
 
             const chartOptions = {
                 responsive: true,
