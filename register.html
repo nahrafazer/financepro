@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - MoneyTrack</title>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -33,22 +36,54 @@
         /* --- Animated Blob Background (Biru Terang & Pink) --- */
         .blobs {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; filter: blur(80px);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            filter: blur(80px);
             opacity: 0.6;
         }
+
         .blob {
-            position: absolute; width: 450px; height: 450px;
+            position: absolute;
+            width: 450px;
+            height: 450px;
             border-radius: 50%;
-            opacity: 0.2; animation: move 25s infinite alternate ease-in-out;
+            opacity: 0.2;
+            animation: move 25s infinite alternate ease-in-out;
         }
-        .blob-1 { top: -10%; left: -10%; background: #0ea5e9; } 
-        .blob-2 { bottom: -10%; right: -10%; background: #db2777; animation-delay: -5s; }
-        .blob-3 { top: 40%; left: 50%; width: 300px; height: 300px; background: #ec4899; animation-duration: 20s; }
+
+        .blob-1 {
+            top: -10%;
+            left: -10%;
+            background: #0ea5e9;
+        }
+
+        .blob-2 {
+            bottom: -10%;
+            right: -10%;
+            background: #db2777;
+            animation-delay: -5s;
+        }
+
+        .blob-3 {
+            top: 40%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            background: #ec4899;
+            animation-duration: 20s;
+        }
 
         @keyframes move {
-            from { transform: translate(0, 0) scale(1); }
-            to { transform: translate(120px, 80px) scale(1.2); }
+            from {
+                transform: translate(0, 0) scale(1);
+            }
+
+            to {
+                transform: translate(120px, 80px) scale(1.2);
+            }
         }
 
         /* --- Frosted Glass Card --- */
@@ -85,12 +120,37 @@
             box-shadow: 0 10px 20px rgba(56, 189, 248, 0.3);
         }
 
-        h2 { margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.05em; text-transform: uppercase; color: var(--text-main); }
-        p.subtitle { color: var(--text-dim); font-size: 0.9rem; margin-top: 8px; margin-bottom: 2.5rem; text-align: center; }
+        h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
+            color: var(--text-main);
+        }
 
-        .form-group { margin-bottom: 1.25rem; }
-        label { display: block; margin-bottom: 8px; font-size: 0.7rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
-        
+        p.subtitle {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 8px;
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
         input {
             width: 100%;
             padding: 14px 18px;
@@ -126,22 +186,50 @@
             box-shadow: 0 10px 15px -3px rgba(56, 189, 248, 0.2);
         }
 
-        button:hover { 
-            opacity: 0.9; 
+        button:hover {
+            opacity: 0.9;
             transform: translateY(-2px);
             box-shadow: 0 20px 25px -5px rgba(56, 189, 248, 0.3);
         }
-        
-        button:active { transform: translateY(0); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-        #status { text-align: center; margin-top: 1.5rem; font-size: 0.875rem; min-height: 20px; font-weight: 600; }
-        
-        .footer-link { text-align: center; margin-top: 2.5rem; font-size: 0.875rem; color: var(--text-dim); }
-        .footer-link a { color: var(--accent); text-decoration: none; font-weight: 700; transition: color 0.2s; }
-        .footer-link a:hover { color: #7dd3fc; }
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #status {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.875rem;
+            min-height: 20px;
+            font-weight: 600;
+        }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 2.5rem;
+            font-size: 0.875rem;
+            color: var(--text-dim);
+        }
+
+        .footer-link a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.2s;
+        }
+
+        .footer-link a:hover {
+            color: #7dd3fc;
+        }
     </style>
 </head>
+
 <body>
 
     <!-- Animated Blobs -->
@@ -156,12 +244,12 @@
             <div class="brand-logo"><i data-lucide="user-plus"></i></div>
             <h2>Register Account</h2>
         </div>
-        
+
         <p class="subtitle">Mulai perjalanan finansial Anda sekarang.</p>
 
         <div class="form-group">
             <label>Username</label>
-            <input type="text" id="username" placeholder="Buat username unik" autocomplete="off">
+            <input type="text" id="username" placeholder="Masukkan Username" autocomplete="off">
         </div>
 
         <div class="form-group">
@@ -169,8 +257,13 @@
             <input type="password" id="password" placeholder="••••••••">
         </div>
 
+        <div class="form-group">
+            <label>Telegram ID</label>
+            <input type="text" id="tele_id" placeholder="Contoh: 12345678" autocomplete="off">
+        </div>
+
         <button onclick="handleRegister()" id="btn-register">Buat Akun Sekarang</button>
-        
+
         <p id="status"></p>
 
         <div class="footer-link">
@@ -186,10 +279,11 @@
         async function handleRegister() {
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value;
+            const teleId = document.getElementById('tele_id').value.trim();
             const status = document.getElementById('status');
             const btn = document.getElementById('btn-register');
 
-            if (!user || !pass) {
+            if (!user || !pass || !teleId) {
                 status.innerText = "Mohon isi semua kolom!";
                 status.style.color = "#f87171";
                 return;
@@ -201,14 +295,25 @@
 
             try {
                 // 1. Cek apakah username sudah ada
-                const { data: existingUser, error: checkError } = await supabaseClient
+                const { data: existingData, error: checkError } = await supabaseClient
                     .from('users')
-                    .select('username')
-                    .eq('username', user)
-                    .maybeSingle();
+                    .select('username, tele_id')
+                    .or(`username.eq.${user},tele_id.eq.${teleId}`)
 
-                if (existingUser) {
-                    status.innerText = "Username sudah terpakai!";
+                if (checkError) throw checkError;
+
+                if (existingData && existingData.length > 0) {
+                    const isUserTaken = existingData.some(d => d.username === user);
+                    const isTeleIdTaken = existingData.some(d => d.tele_id === teleId);
+
+                    if (isUserTaken) {
+                        status.innerText = "Username sudah digunakan!";
+                    } else if (isTeleIdTaken) {
+                        status.innerText = "Telegram ID sudah terdaftar!";
+                    } else {
+                        status.innerText = "Username atau Telegram ID sudah digunakan!";
+                    }
+
                     status.style.color = "#f87171";
                     btn.disabled = false;
                     return;
@@ -217,7 +322,7 @@
                 // 2. Masukkan data user baru
                 const { error: insertError } = await supabaseClient
                     .from('users')
-                    .insert([{ username: user, password: pass }]);
+                    .insert([{ username: user, password: pass, tele_id: teleId }]);
 
                 if (insertError) {
                     status.innerText = "Gagal daftar: " + insertError.message;
@@ -238,4 +343,5 @@
         lucide.createIcons();
     </script>
 </body>
+
 </html>
