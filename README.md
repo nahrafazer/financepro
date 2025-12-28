@@ -1,1 +1,1 @@
-open via https://jaknabungyuk.verce.app
+open via https://jaknabungyuk.vercel.app
