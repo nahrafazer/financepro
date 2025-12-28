@@ -22,7 +22,24 @@ export default async function handler(req, res) {
 
         // Perintah /start untuk mengecek ID
         if (text.startsWith('/start')) {
-            await bot.sendMessage(chatId, `Halo! ID Telegram Anda adalah: ${chatId}. Pastikan ID ini sudah terdaftar di akun MoneyTrack Anda.`);
+            try {
+                // Cari user berdasarkan tele_id
+                const { data: user, error: userError } = await supabase
+                    .from('users')
+                    .select('username')
+                    .eq('tele_id', chatId)
+                    .maybeSingle();
+
+                if (user && user.username) {
+                    // Jika terdaftar, sapa dengan username
+                    await bot.sendMessage(chatId, `Halo, ${user.username}! 👋\n\nSelamat datang kembali di MoneyTrack Bot. Anda bisa langsung mencatat transaksi menggunakan perintah /catat.`);
+                } else {
+                    // Jika belum terdaftar, berikan ID untuk registrasi
+                    await bot.sendMessage(chatId, `Halo! 👋\n\nID Telegram Anda adalah: ${chatId}.\n\nSepertinya ID ini belum terhubung dengan akun MoneyTrack. Silakan daftar atau update profil Anda di website dengan menyertakan ID tersebut.`);
+                }
+            } catch (err) {
+                await bot.sendMessage(chatId, "Terjadi gangguan saat menyapa. Coba lagi nanti.");
+            }
             return res.status(200).send('OK');
         }
 
@@ -70,4 +87,5 @@ export default async function handler(req, res) {
         }
     }
     return res.status(200).send('OK');
+
 }
