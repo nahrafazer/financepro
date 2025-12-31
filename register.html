@@ -20,6 +20,10 @@
             --glass-bg: rgba(28, 37, 51, 0.65);
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg);
@@ -33,7 +37,7 @@
             position: relative;
         }
 
-        /* --- Animated Blob Background (Biru Terang & Pink) --- */
+        /* --- Animated Blob Background --- */
         .blobs {
             position: fixed;
             top: 0;
@@ -54,48 +58,25 @@
             animation: move 25s infinite alternate ease-in-out;
         }
 
-        .blob-1 {
-            top: -10%;
-            left: -10%;
-            background: #0ea5e9;
-        }
-
-        .blob-2 {
-            bottom: -10%;
-            right: -10%;
-            background: #db2777;
-            animation-delay: -5s;
-        }
-
-        .blob-3 {
-            top: 40%;
-            left: 50%;
-            width: 300px;
-            height: 300px;
-            background: #ec4899;
-            animation-duration: 20s;
-        }
+        .blob-1 { top: -10%; left: -10%; background: #0ea5e9; }
+        .blob-2 { bottom: -10%; right: -10%; background: #db2777; animation-delay: -5s; }
+        .blob-3 { top: 40%; left: 50%; width: 300px; height: 300px; background: #ec4899; animation-duration: 20s; }
 
         @keyframes move {
-            from {
-                transform: translate(0, 0) scale(1);
-            }
-
-            to {
-                transform: translate(120px, 80px) scale(1.2);
-            }
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(120px, 80px) scale(1.2); }
         }
 
-        /* --- Frosted Glass Card --- */
+        /* --- Compact Frosted Glass Card --- */
         .register-card {
             background: var(--glass-bg);
             backdrop-filter: blur(16px) saturate(180%);
             -webkit-backdrop-filter: blur(16px) saturate(180%);
-            padding: 3rem;
-            border-radius: 32px;
+            padding: 2rem;
+            border-radius: 28px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 420px;
+            width: 90%;
+            max-width: 400px;
             border: 1px solid var(--border);
             z-index: 10;
         }
@@ -104,25 +85,25 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 2rem;
+            gap: 8px;
+            margin-bottom: 1rem;
         }
 
         .brand-logo {
-            width: 50px;
-            height: 50px;
+            width: 42px;
+            height: 42px;
             background: var(--accent);
-            border-radius: 14px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--bg);
-            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.3);
+            box-shadow: 0 8px 16px rgba(56, 189, 248, 0.3);
         }
 
         h2 {
             margin: 0;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             font-weight: 800;
             letter-spacing: -0.05em;
             text-transform: uppercase;
@@ -131,20 +112,20 @@
 
         p.subtitle {
             color: var(--text-dim);
-            font-size: 0.9rem;
-            margin-top: 8px;
-            margin-bottom: 2.5rem;
+            font-size: 0.85rem;
+            margin-top: 4px;
+            margin-bottom: 1.25rem;
             text-align: center;
         }
 
         .form-group {
-            margin-bottom: 1.25rem;
+            margin-bottom: 0.85rem;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
-            font-size: 0.7rem;
+            margin-bottom: 6px;
+            font-size: 0.65rem;
             font-weight: 800;
             color: var(--text-dim);
             text-transform: uppercase;
@@ -153,67 +134,55 @@
 
         input {
             width: 100%;
-            padding: 14px 18px;
+            padding: 12px 16px;
             background: rgba(0, 0, 0, 0.25);
             border: 1px solid var(--border);
-            border-radius: 14px;
+            border-radius: 12px;
             color: white;
             font-family: 'Inter', sans-serif;
-            font-size: 1rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-sizing: border-box;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
         }
 
         input:focus {
             outline: none;
             border-color: var(--accent);
             background: rgba(0, 0, 0, 0.4);
-            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
         }
 
         button {
             width: 100%;
-            padding: 16px;
+            padding: 14px;
             background: var(--accent);
             color: var(--bg);
             border: none;
-            border-radius: 14px;
+            border-radius: 12px;
             font-weight: 800;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.3s;
-            margin-top: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(56, 189, 248, 0.2);
+            margin-top: 0.75rem;
+            box-shadow: 0 8px 12px -3px rgba(56, 189, 248, 0.2);
         }
 
         button:hover {
             opacity: 0.9;
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(56, 189, 248, 0.3);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
+            transform: translateY(-1px);
         }
 
         #status {
             text-align: center;
-            margin-top: 1.5rem;
-            font-size: 0.875rem;
-            min-height: 20px;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            min-height: 18px;
             font-weight: 600;
         }
 
         .footer-link {
             text-align: center;
-            margin-top: 2.5rem;
-            font-size: 0.875rem;
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
             color: var(--text-dim);
         }
 
@@ -221,18 +190,12 @@
             color: var(--accent);
             text-decoration: none;
             font-weight: 700;
-            transition: color 0.2s;
-        }
-
-        .footer-link a:hover {
-            color: #7dd3fc;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Animated Blobs -->
     <div class="blobs">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
@@ -241,7 +204,7 @@
 
     <div class="register-card">
         <div class="brand">
-            <div class="brand-logo"><i data-lucide="user-plus"></i></div>
+            <div class="brand-logo"><i data-lucide="user-plus" size="20"></i></div>
             <h2>Register Account</h2>
         </div>
 
@@ -249,7 +212,7 @@
 
         <div class="form-group">
             <label>Username</label>
-            <input type="text" id="username" placeholder="Masukkan Username" autocomplete="off">
+            <input type="text" id="username" placeholder="Username" autocomplete="off">
         </div>
 
         <div class="form-group">
@@ -259,7 +222,12 @@
 
         <div class="form-group">
             <label>Telegram ID</label>
-            <input type="text" id="tele_id" placeholder="Contoh: 12345678" autocomplete="off">
+            <input type="text" id="tele_id" placeholder="ID Telegram" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+            <label>Nomor WhatsApp</label>
+            <input type="tel" id="nowa" placeholder="Contoh: 62812..." autocomplete="off">
         </div>
 
         <button onclick="handleRegister()" id="btn-register">Buat Akun Sekarang</button>
@@ -276,65 +244,93 @@
         const _key = "sb_publishable_iOq63sd-3dE061qVRxFkYw_JNEHMaeV";
         const supabaseClient = supabase.createClient(_url, _key);
 
+        function formatWhatsApp(number) {
+            // Hapus semua karakter non-digit
+            let cleaned = number.replace(/\D/g, '');
+            
+            // Jika diawali '0', ganti dengan '62'
+            if (cleaned.startsWith('0')) {
+                cleaned = '62' + cleaned.substring(1);
+            }
+            
+            // Jika diawali '8' (langsung ke provider), tambahkan '62'
+            if (cleaned.startsWith('8')) {
+                cleaned = '62' + cleaned;
+            }
+            
+            return cleaned;
+        }
+
         async function handleRegister() {
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value;
             const teleId = document.getElementById('tele_id').value.trim();
+            let rawNowa = document.getElementById('nowa').value.trim();
             const status = document.getElementById('status');
             const btn = document.getElementById('btn-register');
 
-            if (!user || !pass || !teleId) {
-                status.innerText = "Mohon isi semua kolom!";
+            // Format nomor ke kode negara (62)
+            const formattedNowa = formatWhatsApp(rawNowa);
+
+            if (!user || !pass || !teleId || !formattedNowa) {
+                status.innerText = "Mohon isi semua kolom dengan benar!";
+                status.style.color = "#f87171";
+                return;
+            }
+
+            // Validasi sederhana panjang nomor
+            if (formattedNowa.length < 10) {
+                status.innerText = "Nomor WhatsApp tidak valid!";
                 status.style.color = "#f87171";
                 return;
             }
 
             btn.disabled = true;
-            status.innerText = "Memproses pendaftaran...";
+            status.innerText = "Memproses...";
             status.style.color = "#94a3b8";
 
             try {
-                // 1. Cek apakah username sudah ada
                 const { data: existingData, error: checkError } = await supabaseClient
                     .from('users')
-                    .select('username, tele_id')
-                    .or(`username.eq.${user},tele_id.eq.${teleId}`)
+                    .select('username, tele_id, nowa')
+                    .or(`username.eq.${user},tele_id.eq.${teleId},nowa.eq.${formattedNowa}`);
 
                 if (checkError) throw checkError;
 
                 if (existingData && existingData.length > 0) {
                     const isUserTaken = existingData.some(d => d.username === user);
                     const isTeleIdTaken = existingData.some(d => d.tele_id === teleId);
+                    const isWaTaken = existingData.some(d => d.nowa === formattedNowa);
 
-                    if (isUserTaken) {
-                        status.innerText = "Username sudah digunakan!";
-                    } else if (isTeleIdTaken) {
-                        status.innerText = "Telegram ID sudah terdaftar!";
-                    } else {
-                        status.innerText = "Username atau Telegram ID sudah digunakan!";
-                    }
-
+                    if (isUserTaken) status.innerText = "Username sudah ada!";
+                    else if (isTeleIdTaken) status.innerText = "Telegram ID sudah ada!";
+                    else if (isWaTaken) status.innerText = "WhatsApp sudah terdaftar!";
+                    
                     status.style.color = "#f87171";
                     btn.disabled = false;
                     return;
                 }
 
-                // 2. Masukkan data user baru
                 const { error: insertError } = await supabaseClient
                     .from('users')
-                    .insert([{ username: user, password: pass, tele_id: teleId }]);
+                    .insert([{ 
+                        username: user, 
+                        password: pass, 
+                        tele_id: teleId, 
+                        nowa: formattedNowa 
+                    }]);
 
                 if (insertError) {
-                    status.innerText = "Gagal daftar: " + insertError.message;
+                    status.innerText = "Gagal: " + insertError.message;
                     status.style.color = "#f87171";
                     btn.disabled = false;
                 } else {
-                    status.innerText = "Pendaftaran Berhasil!";
+                    status.innerText = "Berhasil!";
                     status.style.color = "#4ade80";
-                    setTimeout(() => window.location.href = "login.html", 1500);
+                    setTimeout(() => window.location.href = "login.html", 1000);
                 }
             } catch (err) {
-                status.innerText = "Terjadi kesalahan sistem.";
+                status.innerText = "Error sistem.";
                 status.style.color = "#f87171";
                 btn.disabled = false;
             }
