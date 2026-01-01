@@ -81,7 +81,7 @@ export default async function handler(req, res) {
             let totalKeluar = 0;
 
             transactions.forEach((tx, i) => {
-                const simbol = tx.tipe.toLowerCase() === 'pemasukan' ? '➕' : '➖';
+                const simbol = tx.tipe.toLowerCase() === 'pemasukan' ? '🟢' : '🔴';
                 msg += `${i + 1}. ${simbol} *Rp ${tx.nominal.toLocaleString('id-ID')}*\n   └ ${tx.keterangan} (${tx.source})\n\n`;
                 
                 if (tx.tipe.toLowerCase() === 'pemasukan') totalMasuk += tx.nominal;
@@ -146,3 +146,4 @@ export default async function handler(req, res) {
 
     return res.status(200).send('OK');
 }
+
