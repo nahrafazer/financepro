@@ -121,7 +121,7 @@ export default async function handler(req, res) {
 
         if (text === '/catat') {
             await supabase.from('users').update({ bot_state: 'WAITING_INPUT' }).eq('tele_id', chatId);
-            await bot.sendMessage(chatId, "Kirim data format:\n`tipe;nominal;keterangan;sumber`", { parse_mode: 'Markdown' });
+            await bot.sendMessage(chatId, "Kirim data format:\n`tipe;nominal;keterangan;sumber\n\n Klik /cancel untuk batal mencatat.`", { parse_mode: 'Markdown' });
             return res.status(200).send('OK');
         }
 
@@ -158,5 +158,6 @@ export default async function handler(req, res) {
 
     return res.status(200).send('OK');
 }
+
 
 
