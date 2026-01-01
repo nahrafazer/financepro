@@ -2,8 +2,8 @@ const { createClient } = require('@supabase/supabase-js');
 const TelegramBot = require('node-telegram-bot-api');
 
 const SUPABASE_URL = "https://uufpobwisjrocbyuzztx.supabase.co";
-const SUPABASE_KEY = "YOUR_SERVICE_ROLE_KEY"; // Gunakan Service Role untuk update
-const token = 'YOUR_BOT_TOKEN';
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1ZnBvYndpc2pyb2NieXV6enR4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjY3MzEyMywiZXhwIjoyMDgyMjQ5MTIzfQ.vcKYItJ1b8g7B4cVnXmn12nr1xJso9h7pO1vjjNlO64"; // Gunakan Service Role untuk update
+const token = '8233970005:AAF5GMoEkA5Rneioq3QFuqhr1cxMhIjGMbE';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const bot = new TelegramBot(token);
@@ -117,3 +117,4 @@ async function updateState(teleId, state, data) {
         .update({ bot_state: state, temp_data: data })
         .eq('tele_id', teleId);
 }
+
