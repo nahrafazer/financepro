@@ -35,33 +35,50 @@ export default async function handler(req, res) {
             return res.status(200).send('OK');
         }
 
-        // --- FITUR /CANCEL (MEMBATALKAN PROSES INPUT) ---
         if (text === '/cancel') {
             await supabase.from('users').update({ bot_state: null }).eq('tele_id', chatId);
             await bot.sendMessage(chatId, "🚫 Proses pencatatan dibatalkan.");
             return res.status(200).send('OK');
         }
 
-        // --- FITUR /BALANCE (TOTAL KESELURUHAN) ---
+        // --- FITUR /BALANCE (DIPISAH PER SOURCE) ---
         if (text === '/balance') {
             const { data: transactions, error } = await supabase
                 .from('moneytrack')
-                .select('tipe, nominal')
+                .select('tipe, nominal, source')
                 .eq('username', user.username);
 
             if (error) throw error;
 
-            let totalSaldo = 0;
+            const saldoPerSource = {};
+            let totalKeseluruhan = 0;
+
             transactions.forEach(tx => {
-                if (tx.tipe.toLowerCase() === 'pemasukan') totalSaldo += tx.nominal;
-                else totalSaldo -= tx.nominal;
+                const src = tx.source ? tx.source.toUpperCase() : 'CASH';
+                const nominal = parseInt(tx.nominal);
+                
+                if (!saldoPerSource[src]) saldoPerSource[src] = 0;
+
+                if (tx.tipe.toLowerCase() === 'pemasukan') {
+                    saldoPerSource[src] += nominal;
+                    totalKeseluruhan += nominal;
+                } else {
+                    saldoPerSource[src] -= nominal;
+                    totalKeseluruhan -= nominal;
+                }
             });
 
-            await bot.sendMessage(chatId, `💰 *TOTAL SALDO KESELURUHAN*\n\n========= \n*Rp ${totalSaldo.toLocaleString('id-ID')}* \n=========`, { parse_mode: 'Markdown' });
+            let msg = `💰 *RINCIAN SALDO PER SUMBER*\n\n`;
+            for (const [source, saldo] of Object.entries(saldoPerSource)) {
+                msg += `• *${source}*: Rp ${saldo.toLocaleString('id-ID')}\n`;
+            }
+            msg += `\n────────────────\n`;
+            msg += `*TOTAL SEMUA:* Rp ${totalKeseluruhan.toLocaleString('id-ID')}`;
+
+            await bot.sendMessage(chatId, msg, { parse_mode: 'Markdown' });
             return res.status(200).send('OK');
         }
 
-        // --- FITUR /TODAY (RINCIAN HARI INI) ---
         if (text === '/today') {
             const { data: transactions, error } = await supabase
                 .from('moneytrack')
@@ -70,80 +87,61 @@ export default async function handler(req, res) {
                 .eq('tanggal', hariIni);
 
             if (error) throw error;
-
             if (!transactions || transactions.length === 0) {
-                await bot.sendMessage(chatId, "Belum ada transaksi untuk hari ini.");
+                await bot.sendMessage(chatId, "Belum ada transaksi hari ini.");
                 return res.status(200).send('OK');
             }
 
-            let msg = `📅 *Rincian Transaksi Hari Ini*\n_${hariIni}_\n\n`;
-            let totalMasuk = 0;
-            let totalKeluar = 0;
+            let msg = `📅 *Transaksi Hari Ini*\n_${hariIni}_\n\n`;
+            let masuk = 0, keluar = 0;
 
             transactions.forEach((tx, i) => {
-                const simbol = tx.tipe.toLowerCase() === 'pemasukan' ? '🟢' : '🔴';
+                const simbol = tx.tipe.toLowerCase() === 'pemasukan' ? '➕' : '➖';
                 msg += `${i + 1}. ${simbol} *Rp ${tx.nominal.toLocaleString('id-ID')}*\n   └ ${tx.keterangan} (${tx.source})\n\n`;
-                
-                if (tx.tipe.toLowerCase() === 'pemasukan') totalMasuk += tx.nominal;
-                else totalKeluar += tx.nominal;
+                tx.tipe.toLowerCase() === 'pemasukan' ? masuk += tx.nominal : keluar += tx.nominal;
             });
 
-            msg += `────────────────\n`;
-            msg += `🟢 Masuk: Rp ${totalMasuk.toLocaleString('id-ID')}\n`;
-            msg += `🔴 Keluar: Rp ${totalKeluar.toLocaleString('id-ID')}\n`;
-            msg += `📊 Selisih: Rp ${(totalMasuk - totalKeluar).toLocaleString('id-ID')}`;
-
+            msg += `────────────────\n🟢 Masuk: Rp ${masuk.toLocaleString('id-ID')}\n🔴 Keluar: Rp ${keluar.toLocaleString('id-ID')}`;
             await bot.sendMessage(chatId, msg, { parse_mode: 'Markdown' });
             return res.status(200).send('OK');
         }
 
-        // --- FITUR /CATAT ---
         if (text === '/catat') {
             await supabase.from('users').update({ bot_state: 'WAITING_INPUT' }).eq('tele_id', chatId);
-            await bot.sendMessage(chatId, "Kirim data dengan format:\n\n`tipe;nominal;keterangan;sumber`\n\nContoh:\n`pengeluaran;25000;makan siang;cash` \n\nAtau ketik /cancel untuk membatalkan.", { parse_mode: 'Markdown' });
+            await bot.sendMessage(chatId, "Kirim data format:\n`tipe;nominal;keterangan;sumber`", { parse_mode: 'Markdown' });
             return res.status(200).send('OK');
         }
 
-        // --- PROSES INPUT DATA ---
         if (user.bot_state === 'WAITING_INPUT') {
             const parts = text.split(';');
             if (parts.length < 4) {
-                await bot.sendMessage(chatId, "⚠️ Format salah! Gunakan pemisah titik koma.\nContoh: `pengeluaran;5000;parkir;cash` \n\nKetik /cancel jika ingin membatalkan.", { parse_mode: 'Markdown' });
+                await bot.sendMessage(chatId, "⚠️ Gunakan format: `tipe;nominal;keterangan;sumber` atau /cancel", { parse_mode: 'Markdown' });
                 return res.status(200).send('OK');
             }
 
             const [tipe, nominal, keterangan, source] = parts.map(p => p.trim());
             const cleanNominal = parseInt(nominal.replace(/[^0-9]/g, ''));
 
-            if (isNaN(cleanNominal)) {
-                await bot.sendMessage(chatId, "❌ Nominal harus berupa angka.");
-                return res.status(200).send('OK');
-            }
-
-            const { error: insertError } = await supabase
-                .from('moneytrack')
-                .insert([{
-                    username: user.username,
-                    tipe: tipe.toLowerCase(),
-                    nominal: cleanNominal,
-                    keterangan: keterangan,
-                    source: source,
-                    tanggal: hariIni
-                }]);
+            const { error: insertError } = await supabase.from('moneytrack').insert([{
+                username: user.username,
+                tipe: tipe.toLowerCase(),
+                nominal: cleanNominal,
+                keterangan: keterangan,
+                source: source,
+                tanggal: hariIni
+            }]);
 
             if (insertError) throw insertError;
 
-            // Reset state setelah sukses
             await supabase.from('users').update({ bot_state: null }).eq('tele_id', chatId);
-            await bot.sendMessage(chatId, `✅ *Berhasil Dicatat!*\n\n💰 Rp ${cleanNominal.toLocaleString('id-ID')}\n📝 ${keterangan}\n🏦 ${source}`, { parse_mode: 'Markdown' });
+            await bot.sendMessage(chatId, `✅ Tercatat: Rp ${cleanNominal.toLocaleString('id-ID')} (${source})`);
             return res.status(200).send('OK');
         }
 
     } catch (err) {
         console.error(err);
-        await bot.sendMessage(chatId, "❌ Terjadi kesalahan pada sistem.");
+        await bot.sendMessage(chatId, "❌ Terjadi kesalahan.");
     }
 
     return res.status(200).send('OK');
 }
-
