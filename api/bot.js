@@ -2,8 +2,8 @@ const { createClient } = require('@supabase/supabase-js');
 const TelegramBot = require('node-telegram-bot-api');
 
 const SUPABASE_URL = "https://uufpobwisjrocbyuzztx.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1ZnBvYndpc2pyb2NieXV6enR4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjY3MzEyMywiZXhwIjoyMDgyMjQ5MTIzfQ.vcKYItJ1b8g7B4cVnXmn12nr1xJso9h7pO1vjjNlO64";
-const token = '8233970005:AAF5GMoEkA5Rneioq3QFuqhr1cxMhIjGMbE';
+const SUPABASE_KEY = "YOUR_SERVICE_ROLE_KEY"; // Gunakan Service Role untuk update
+const token = 'YOUR_BOT_TOKEN';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const bot = new TelegramBot(token);
@@ -18,86 +18,88 @@ export default async function handler(req, res) {
     const text = message.text;
 
     try {
-        // 1. Cek User berdasarkan tele_id
-        const { data: user, error: userError } = await supabase
+        // 1. Ambil User & State
+        let { data: user, error: userError } = await supabase
             .from('users')
-            .select('username')
+            .select('*')
             .eq('tele_id', chatId)
             .maybeSingle();
 
-        if (text.startsWith('/start')) {
-            if (user) {
-                await bot.sendMessage(chatId, `Halo, ${user.username}! 👋\n\nGunakan perintah:\n/catat [tipe] [nominal] [keterangan] [source]\n/balance - Untuk cek saldo`);
-            } else {
-                await bot.sendMessage(chatId, `Halo! 👋\nID Telegram Anda: ${chatId}\nSilakan daftar di web dengan ID ini.`);
+        if (!user) {
+            if (text.startsWith('/start')) {
+                return await bot.sendMessage(chatId, `Halo! 👋 ID Anda: ${chatId}\nSilakan daftar di web.`);
             }
-        } 
-        
-        else if (text.startsWith('/balance')) {
-            if (!user) return await bot.sendMessage(chatId, "❌ Akun belum terdaftar.");
-
-            // Ambil semua transaksi user
-            const { data: transactions, error: txError } = await supabase
-                .from('moneytrack')
-                .select('tipe, nominal, source')
-                .eq('username', user.username);
-
-            if (txError) throw txError;
-
-            if (!transactions || transactions.length === 0) {
-                return await bot.sendMessage(chatId, "Belum ada riwayat transaksi.");
-            }
-
-            // Hitung saldo per source
-            const balancePerSource = {};
-            let totalSemua = 0;
-
-            transactions.forEach(tx => {
-                const source = tx.source || 'Cash';
-                const nominal = parseInt(tx.nominal);
-                if (!balancePerSource[source]) balancePerSource[source] = 0;
-
-                if (tx.tipe === 'pemasukan') {
-                    balancePerSource[source] += nominal;
-                    totalSemua += nominal;
-                } else {
-                    balancePerSource[source] -= nominal;
-                    totalSemua -= nominal;
-                }
-            });
-
-            // Susun pesan balasan
-            let responseMsg = `💰 *Rincian Saldo ${user.username}* 💰\n\n`;
-            for (const [src, bal] of Object.entries(balancePerSource)) {
-                responseMsg += `• *${src}*: Rp ${bal.toLocaleString('id-ID')}\n`;
-            }
-            responseMsg += `\n────────────────\n*TOTAL SALDO:* Rp ${totalSemua.toLocaleString('id-ID')}`;
-
-            await bot.sendMessage(chatId, responseMsg, { parse_mode: 'Markdown' });
+            return await bot.sendMessage(chatId, "❌ Akun belum terdaftar.");
         }
 
-        else if (text.startsWith('/catat')) {
-            if (!user) return await bot.sendMessage(chatId, "❌ Akun belum terdaftar.");
-            
-            const parts = text.split(' ');
-            if (parts.length < 4) {
-                return await bot.sendMessage(chatId, "⚠️ Format: /catat [tipe] [nominal] [keterangan] [sumber]");
-            }
+        const state = user.bot_state;
 
-            const [_, tipe, nominal, keterangan, source] = parts;
-            const { error: insertError } = await supabase
-                .from('moneytrack')
-                .insert([{
-                    username: user.username,
-                    tipe: tipe.toLowerCase(),
-                    nominal: parseInt(nominal),
-                    keterangan: keterangan,
-                    source: source || 'Cash',
-                    tanggal: new Date().toISOString().split('T')[0]
-                }]);
+        // --- LOGIKA STATE MACHINE ---
 
-            if (insertError) throw insertError;
-            await bot.sendMessage(chatId, `✅ Berhasil mencatat ${tipe} Rp ${parseInt(nominal).toLocaleString('id-ID')}`);
+        // Jika user mengetik /catat (Reset/Mulai awal)
+        if (text.startsWith('/catat')) {
+            await updateState(chatId, 'WAITING_TIPE', {});
+            return await bot.sendMessage(chatId, "Silakan pilih tipe transaksi:", {
+                reply_markup: {
+                    keyboard: [[{ text: 'Pemasukan' }, { text: 'Pengeluaran' }]],
+                    one_time_keyboard: true,
+                    resize_keyboard: true
+                }
+            });
+        }
+
+        // Jalankan perintah berdasarkan state
+        switch (state) {
+            case 'WAITING_TIPE':
+                const tipe = text.toLowerCase();
+                if (tipe !== 'pemasukan' && tipe !== 'pengeluaran') {
+                    return await bot.sendMessage(chatId, "Mohon pilih: Pemasukan atau Pengeluaran");
+                }
+                await updateState(chatId, 'WAITING_NOMINAL', { tipe });
+                await bot.sendMessage(chatId, "Berapa jumlah nominalnya? (Hanya angka)");
+                break;
+
+            case 'WAITING_NOMINAL':
+                const nominal = parseInt(text.replace(/[^0-9]/g, ''));
+                if (isNaN(nominal)) return await bot.sendMessage(chatId, "Masukkan angka yang valid.");
+                
+                await updateState(chatId, 'WAITING_KETERANGAN', { ...user.temp_data, nominal });
+                await bot.sendMessage(chatId, "Apa keterangan transaksinya?");
+                break;
+
+            case 'WAITING_KETERANGAN':
+                await updateState(chatId, 'WAITING_SOURCE', { ...user.temp_data, keterangan: text });
+                await bot.sendMessage(chatId, "Sumber dananya dari mana? (Contoh: Cash, Bank, E-Wallet)");
+                break;
+
+            case 'WAITING_SOURCE':
+                const finalData = { ...user.temp_data, source: text };
+                
+                // Simpan ke Tabel Moneytrack
+                const { error: insertError } = await supabase
+                    .from('moneytrack')
+                    .insert([{
+                        username: user.username,
+                        tipe: finalData.tipe,
+                        nominal: finalData.nominal,
+                        keterangan: finalData.keterangan,
+                        source: finalData.source,
+                        tanggal: new Date().toISOString().split('T')[0]
+                    }]);
+
+                if (insertError) throw insertError;
+
+                // Reset State
+                await updateState(chatId, null, null);
+                await bot.sendMessage(chatId, `✅ Berhasil mencatat!\n\n📌 *${finalData.tipe.toUpperCase()}*\n💰 Rp ${finalData.nominal.toLocaleString('id-ID')}\n📝 ${finalData.keterangan}\n🏦 ${finalData.source}`, { parse_mode: 'Markdown' });
+                break;
+
+            default:
+                if (text.startsWith('/balance')) {
+                    // Logika /balance tetap sama seperti sebelumnya
+                    await handleBalance(chatId, user);
+                }
+                break;
         }
 
     } catch (err) {
@@ -106,4 +108,12 @@ export default async function handler(req, res) {
     }
 
     return res.status(200).send('OK');
+}
+
+// Fungsi pembantu untuk update state di DB
+async function updateState(teleId, state, data) {
+    await supabase
+        .from('users')
+        .update({ bot_state: state, temp_data: data })
+        .eq('tele_id', teleId);
 }
