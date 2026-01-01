@@ -41,7 +41,8 @@ export default async function handler(req, res) {
                                 `Gunakan menu berikut:\n` +
                                 `📝 /catat - Catat transaksi baru\n` +
                                 `💰 /balance - Cek rincian saldo\n` +
-                                `📅 /today - Lihat transaksi hari ini`;
+                                `📅 /today - Lihat transaksi hari ini\n` +
+                                `Silahkan kunjungi https://jaknabungyuk.vercel.app`;
             
             await bot.sendMessage(chatId, pesanSapaan, { parse_mode: 'Markdown' });
             return res.status(200).send('OK');
@@ -157,4 +158,5 @@ export default async function handler(req, res) {
 
     return res.status(200).send('OK');
 }
+
 
