@@ -35,6 +35,18 @@ export default async function handler(req, res) {
             return res.status(200).send('OK');
         }
 
+        if (text === '/start') {
+            const namaUser = user.username || "Pengguna";
+            const pesanSapaan = `👋 Halo, *${namaUser}*!\n\nSelamat datang kembali di Bot MoneyTrack. Akun Anda sudah terdaftar dan siap digunakan.\n\n` +
+                                `Gunakan menu berikut:\n` +
+                                `📝 /catat - Catat transaksi baru\n` +
+                                `💰 /balance - Cek rincian saldo\n` +
+                                `📅 /today - Lihat transaksi hari ini`;
+            
+            await bot.sendMessage(chatId, pesanSapaan, { parse_mode: 'Markdown' });
+            return res.status(200).send('OK');
+        }
+
         if (text === '/cancel') {
             await supabase.from('users').update({ bot_state: null }).eq('tele_id', chatId);
             await bot.sendMessage(chatId, "🚫 Proses pencatatan dibatalkan.");
@@ -145,3 +157,4 @@ export default async function handler(req, res) {
 
     return res.status(200).send('OK');
 }
+
