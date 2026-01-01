@@ -6,61 +6,70 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const token = '8233970005:AAF5GMoEkA5Rneioq3QFuqhr1cxMhIjGMbE';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-const bot = new TelegramBot(token);
+
+// PENTING: Matikan polling agar tidak terjadi timeout di Vercel
+const bot = new TelegramBot(token, { polling: false });
 
 export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(200).send('Bot is active');
+    // Vercel hanya menerima POST dari Telegram Webhook
+    if (req.method !== 'POST') {
+        return res.status(200).send('Bot is active');
+    }
 
     const { message } = req.body;
-    if (!message || !message.text) return res.status(200).send('OK');
+    if (!message || !message.text) {
+        return res.status(200).send('OK');
+    }
 
     const chatId = message.chat.id.toString();
     const text = message.text;
 
     try {
+        // 1. Ambil data user
         const { data: user, error: userError } = await supabase
             .from('users')
             .select('*')
             .eq('tele_id', chatId)
             .maybeSingle();
 
-        if (text.startsWith('/start')) {
-            if (user) {
-                return await bot.sendMessage(chatId, `Halo, ${user.username}! 👋\n\nGunakan /catat untuk mulai mengisi data.`);
-            } else {
-                return await bot.sendMessage(chatId, `Halo! 👋\nID Telegram Anda: ${chatId}\nSilakan daftar di web.`);
-            }
+        if (text === '/start') {
+            const msg = user 
+                ? `Halo ${user.username}! Gunakan /catat untuk mulai.` 
+                : `Halo! ID Anda: ${chatId}. Silakan daftar di web.`;
+            await bot.sendMessage(chatId, msg);
+            return res.status(200).send('OK');
         }
 
-        if (!user) return await bot.sendMessage(chatId, "❌ Akun belum terdaftar.");
+        if (!user) {
+            await bot.sendMessage(chatId, "❌ Akun belum terdaftar.");
+            return res.status(200).send('OK');
+        }
 
-        // 1. Jika pengguna mengetik /catat
+        // 2. Logika /catat (Triger status menunggu)
         if (text === '/catat') {
-            // Set state user menjadi WAITING_INPUT
             await supabase.from('users').update({ bot_state: 'WAITING_INPUT' }).eq('tele_id', chatId);
-            
-            return await bot.sendMessage(chatId, 
-                "Silakan kirim data dengan format berikut:\n\n`tipe;nominal;keterangan;sumber`\n\nContoh:\n`pengeluaran;50000;makan siang;cash`", 
-                { parse_mode: 'Markdown' }
-            );
+            await bot.sendMessage(chatId, "Silakan kirim data dengan format:\n\n`tipe;nominal;keterangan;sumber`\n\nContoh:\n`pengeluaran;50000;bakso;cash`", { parse_mode: 'Markdown' });
+            return res.status(200).send('OK');
         }
 
-        // 2. Jika user dalam mode WAITING_INPUT dan mengirim pesan
+        // 3. Logika Menangkap Input Format tipe;nominal;keterangan;source
         if (user.bot_state === 'WAITING_INPUT') {
             const parts = text.split(';');
 
             if (parts.length < 4) {
-                return await bot.sendMessage(chatId, "⚠️ Format salah! Gunakan format:\n`tipe;nominal;keterangan;sumber`", { parse_mode: 'Markdown' });
+                await bot.sendMessage(chatId, "⚠️ Format salah. Gunakan titik koma (;) sebagai pemisah.\nContoh: `pemasukan;100000;gaji;bank`", { parse_mode: 'Markdown' });
+                return res.status(200).send('OK');
             }
 
             const [tipe, nominal, keterangan, source] = parts.map(p => p.trim());
             const cleanNominal = parseInt(nominal.replace(/[^0-9]/g, ''));
 
             if (isNaN(cleanNominal)) {
-                return await bot.sendMessage(chatId, "❌ Nominal harus berupa angka.");
+                await bot.sendMessage(chatId, "❌ Nominal harus berupa angka.");
+                return res.status(200).send('OK');
             }
 
-            // Simpan ke moneytrack
+            // Simpan ke DB
             const { error: insertError } = await supabase
                 .from('moneytrack')
                 .insert([{
@@ -74,35 +83,26 @@ export default async function handler(req, res) {
 
             if (insertError) throw insertError;
 
-            // Reset state kembali ke NULL
+            // Reset State
             await supabase.from('users').update({ bot_state: null }).eq('tele_id', chatId);
-
-            return await bot.sendMessage(chatId, 
-                `✅ *Data Berhasil Dicatat*\n\n💰 Rp ${cleanNominal.toLocaleString('id-ID')}\n📝 ${keterangan}\n🏦 ${source}`, 
-                { parse_mode: 'Markdown' }
-            );
+            await bot.sendMessage(chatId, `✅ Berhasil dicatat!\n💰 Rp ${cleanNominal.toLocaleString('id-ID')}\n📝 ${keterangan}`);
+            return res.status(200).send('OK');
         }
 
-        // Perintah lain seperti /balance
-        if (text.startsWith('/balance')) {
-            const { data: transactions } = await supabase
-                .from('moneytrack')
-                .select('tipe, nominal, source')
-                .eq('username', user.username);
-
+        // 4. Perintah Balance
+        if (text === '/balance') {
+            const { data: tx } = await supabase.from('moneytrack').select('tipe, nominal').eq('username', user.username);
             let total = 0;
-            transactions.forEach(tx => {
-                const nom = parseInt(tx.nominal);
-                tx.tipe === 'pemasukan' ? total += nom : total -= nom;
-            });
-
-            return await bot.sendMessage(chatId, `💰 *Total Saldo:* Rp ${total.toLocaleString('id-ID')}`, { parse_mode: 'Markdown' });
+            tx?.forEach(t => t.tipe === 'pemasukan' ? total += t.nominal : total -= t.nominal);
+            await bot.sendMessage(chatId, `💰 Saldo Total: Rp ${total.toLocaleString('id-ID')}`);
         }
 
     } catch (err) {
-        console.error(err);
-        await bot.sendMessage(chatId, "❌ Terjadi kesalahan sistem.");
+        console.error("Error context:", err);
+        // Pastikan tidak mengirim response error ke Telegram berulang kali
+        await bot.sendMessage(chatId, "❌ Terjadi gangguan. Coba lagi nanti.");
     }
 
+    // Selalu kirim status 200 agar Telegram tidak mengirim ulang pesan yang sama (looping)
     return res.status(200).send('OK');
 }
