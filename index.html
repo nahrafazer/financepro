@@ -70,14 +70,14 @@
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            padding: 2.5rem 1.5rem;
+            padding: 2rem 1.25rem; /* Margin sidebar sedikit diperkecil */
             flex-shrink: 0;
             z-index: 100;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .brand {
-            display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 3rem;
+            display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 2.5rem;
             padding: 0 0.5rem;
         }
         .brand-content { display: flex; align-items: center; gap: 12px; }
@@ -118,31 +118,34 @@
 
         .main-container {
             flex: 1; display: flex; flex-direction: column;
-            padding: 2.5rem 3rem; overflow: hidden; position: relative;
+            padding: 1.25rem 1.5rem; /* Margin utama diperkecil signifikan */
+            overflow: hidden; position: relative;
         }
 
-        .page-header { flex-shrink: 0; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; }
+        .page-header { flex-shrink: 0; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end; }
         .page-header h1 { margin: 0; font-size: 1.8rem; font-weight: 700; letter-spacing: -0.04em; }
-        .page-header p { margin: 6px 0 0; color: var(--text-dim); font-size: 0.9rem; }
+        .page-header p { margin: 4px 0 0; color: var(--text-dim); font-size: 0.9rem; }
 
         .stats-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; flex-shrink: 0; margin-bottom: 2rem;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; /* Gap diperkecil */
+            flex-shrink: 0; margin-bottom: 1.5rem;
         }
         .stat-card {
             background: var(--card-glass); 
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--border);
-            padding: 1.5rem; border-radius: 24px; display: flex; flex-direction: column; gap: 12px;
+            padding: 1.25rem; border-radius: 20px; display: flex; flex-direction: column; gap: 8px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             transition: 0.3s;
         }
         .stat-card:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-3px); }
-        .stat-meta { display: flex; align-items: center; gap: 8px; color: var(--text-dim); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-value { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; color: #fff; }
+        .stat-meta { display: flex; align-items: center; gap: 8px; color: var(--text-dim); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; color: #fff; }
 
         .content-grid {
-            display: grid; grid-template-columns: 340px 1fr; gap: 1.5rem; flex: 1; min-height: 0;
+            display: grid; grid-template-columns: 380px 1fr; /* Card input dilebarkan dari 340px ke 380px */
+            gap: 1rem; flex: 1; min-height: 0;
         }
         
         .page-view {
@@ -151,7 +154,7 @@
             flex: 1;
             min-height: 0;
             overflow-y: auto;
-            padding-bottom: 2rem;
+            padding-bottom: 0; 
         }
         .page-view.active { display: flex; }
 
@@ -159,12 +162,12 @@
             background: var(--card-glass); 
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border); border-radius: 28px;
+            border: 1px solid var(--border); border-radius: 24px;
             display: flex; flex-direction: column; overflow: hidden; 
             box-shadow: 0 15px 45px rgba(0,0,0,0.3);
         }
-        .card-head { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); }
-        .card-head h3 { margin: 0; font-size: 1rem; font-weight: 700; color: var(--accent); }
+        .card-head { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); }
+        .card-head h3 { margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--accent); }
 
         .card-content { padding: 1.5rem; overflow-y: auto; flex: 1; }
 
@@ -188,7 +191,7 @@
         .btn-submit:hover { filter: brightness(1.15); transform: scale(1.02); }
 
         .table-area { 
-            max-height: 420px; /* Batasi tinggi untuk sekitar 5 baris data + header */
+            flex: 1; /* Biar tabel mengambil sisa space di card */
             overflow-y: auto; 
             scrollbar-width: thin; 
             scrollbar-color: var(--border) transparent; 
@@ -202,7 +205,7 @@
             text-align: left; padding: 14px 1.5rem; font-size: 11px; 
             color: var(--text-dim); text-transform: uppercase; border-bottom: 1px solid var(--border);
         }
-        td { padding: 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; transition: 0.2s; }
+        td { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; transition: 0.2s; }
         tr:hover td { background: rgba(255,255,255,0.02); }
 
         .date-separator {
@@ -210,7 +213,7 @@
             border-bottom: 1px solid var(--border);
         }
         .date-separator td {
-            padding: 12px 1.5rem;
+            padding: 10px 1.5rem;
             font-size: 10px;
             font-weight: 800;
             color: var(--accent);
@@ -256,8 +259,8 @@
         .m-btn-settle { background: var(--success); color: #fff; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2); }
 
         .balance-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;
-            padding: 10px; 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;
+            padding: 5px; 
         }
         .balance-card {
             background: var(--card-glass); border: 1px solid var(--border); border-radius: 24px; padding: 1.5rem;
@@ -285,30 +288,30 @@
         }
 
         .charts-container {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; flex: 1; min-height: 0;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; flex: 1; min-height: 0;
         }
         .chart-card {
             background: var(--card-glass); 
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border); border-radius: 28px;
-            padding: 1.5rem; display: flex; flex-direction: column;
+            border: 1px solid var(--border); border-radius: 24px;
+            padding: 1.25rem; display: flex; flex-direction: column;
             box-shadow: 0 15px 45px rgba(0,0,0,0.3);
         }
 
         .insight-highlight {
             grid-column: span 2;
-            padding: 1.5rem 2rem;
+            padding: 1.25rem 1.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
         .insight-label { color: var(--text-dim); font-size: 0.85rem; font-weight: 500; }
         .insight-value { color: var(--danger); font-size: 1.4rem; font-weight: 800; }
 
         .profile-container {
-            display: grid; grid-template-columns: 300px 1fr; gap: 2rem;
+            display: grid; grid-template-columns: 320px 1fr; gap: 1rem;
         }
         .profile-header {
             text-align: center; padding: 2rem; background: rgba(255,255,255,0.02); border-radius: 24px; border: 1px solid var(--border);
@@ -372,36 +375,62 @@
             
             .main-container { 
                 flex: 1;
-                padding: 1.5rem; 
-                overflow-y: auto; /* Pastikan area ini yang melakukan scroll */
+                padding: 1rem; 
+                overflow-y: auto;
                 -webkit-overflow-scrolling: touch;
             }
             
-            /* Pada mobile, area tabel tetap mengikuti batas tinggi agar scroll di dalam bekerja */
             .page-view { overflow: visible; height: auto; min-height: auto; flex: none; }
 
-            .content-grid, .charts-container, .profile-container { grid-template-columns: 1fr; flex: none; gap: 1.5rem; }
+            .content-grid, .charts-container, .profile-container { grid-template-columns: 1fr; flex: none; gap: 1rem; }
             .stats-grid { grid-template-columns: 1fr; }
-            .table-area { max-height: 420px; overflow-y: auto; } /* Konsisten menampilkan 5 data di mobile */
+            .table-area { max-height: 420px; overflow-y: auto; } 
             .insight-highlight { grid-column: span 1; }
             
             .sidebar .brand { display: none; }
         }
 
-        /* Jam Digital Style */
+        /* Analog Clock Styles */
         .time-badge {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             background: rgba(56, 189, 248, 0.1);
             border: 1px solid rgba(56, 189, 248, 0.2);
-            padding: 6px 14px;
-            border-radius: 12px;
+            padding: 8px 16px;
+            border-radius: 16px;
             color: var(--accent);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-weight: 700;
-            margin-top: 8px;
+            margin-top: 10px;
             width: fit-content;
+        }
+
+        .analog-clock {
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            position: relative;
+            background: rgba(255,255,255,0.03);
+            flex-shrink: 0;
+        }
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            background: var(--accent);
+            border-radius: 10px;
+            transform: translateX(-50%) rotate(0deg);
+        }
+        .hour-hand { width: 2.5px; height: 7px; z-index: 3; }
+        .min-hand { width: 1.5px; height: 11px; z-index: 2; }
+        .sec-hand { width: 1px; height: 12px; background: var(--danger); z-index: 1; }
+        .clock-center {
+            width: 4px; height: 4px; background: #fff; border-radius: 50%;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 4;
         }
     </style>
 </head>
@@ -584,8 +613,13 @@
                 <h1 id="greeting-txt">Dashboard Finansial</h1>
                 <p id="sub-header-txt">Your Financial Assistant.</p>
                 <div class="time-badge">
-                    <i data-lucide="clock" style="width: 14px"></i>
-                    <span id="local-clock">00:00:00</span>
+                    <div class="analog-clock">
+                        <div class="hand hour-hand" id="hour-hand"></div>
+                        <div class="hand min-hand" id="min-hand"></div>
+                        <div class="hand sec-hand" id="sec-hand"></div>
+                        <div class="clock-center"></div>
+                    </div>
+                    <span id="local-clock">00:00</span>
                 </div>
             </div>
             <div id="sync-status" style="font-size: 0.75rem; color: var(--accent); display: none;">
@@ -828,19 +862,37 @@
         let expenseChartInstance = null;
         let allTransactions = [];
 
-        // Fitur Jam Lokasi Real-time
+        // Fitur Jam Analog Real-time
         function startClock() {
-            const clockElement = document.getElementById('local-clock');
+            const hourHand = document.getElementById('hour-hand');
+            const minHand = document.getElementById('min-hand');
+            const secHand = document.getElementById('sec-hand');
+            const digitalDisplay = document.getElementById('local-clock');
             
             function updateTime() {
                 const now = new Date();
-                const timeString = now.toLocaleTimeString('id-ID', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: false
-                });
-                clockElement.innerText = timeString;
+                const seconds = now.getSeconds();
+                const minutes = now.getMinutes();
+                const hours = now.getHours();
+
+                // Hitung rotasi derajat
+                const secDeg = (seconds / 60) * 360;
+                const minDeg = ((minutes + seconds / 60) / 60) * 360;
+                const hourDeg = ((hours % 12 + minutes / 60) / 12) * 360;
+
+                // Terapkan rotasi
+                if(secHand) secHand.style.transform = `translateX(-50%) rotate(${secDeg}deg)`;
+                if(minHand) minHand.style.transform = `translateX(-50%) rotate(${minDeg}deg)`;
+                if(hourHand) hourHand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+
+                // Tetap tampilkan digital sederhana di sampingnya
+                if(digitalDisplay) {
+                    digitalDisplay.innerText = now.toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                    });
+                }
             }
             
             updateTime();
@@ -884,7 +936,6 @@
             element.classList.add('active');
             document.getElementById('global-stats-section').style.display = pageId === 'profile' ? 'none' : 'grid';
             
-            // Scroll ke atas saat pindah halaman di mobile
             const container = document.getElementById('main-content');
             if (container) container.scrollTop = 0;
 
@@ -944,7 +995,6 @@
             const container = document.getElementById('source-balance-container');
             container.innerHTML = "";
 
-            // Menambahkan Kartu Transfer sebagai elemen aksi pertama agar bentuknya sama dengan saldo
             const transferCard = document.createElement('div');
             transferCard.className = "balance-card";
             transferCard.style.cursor = "pointer";
@@ -1003,11 +1053,9 @@
                 });
             }
 
-            // Hitung Total Saldo (Kumulatif)
             const sumAdds = allTransactions.reduce((acc, c) => (c.tipe === 'pemasukan' || c.tipe === 'utang') ? acc + Number(c.nominal) : acc, 0);
             const sumSubs = allTransactions.reduce((acc, c) => (c.tipe === 'pengeluaran' || c.tipe === 'piutang') ? acc + Number(c.nominal) : acc, 0);
 
-            // Filter data untuk 30 hari terakhir
             const now = new Date();
             const cutoffDate = new Date();
             cutoffDate.setDate(now.getDate() - 30);
@@ -1015,7 +1063,6 @@
 
             const transactionsLast30Days = allTransactions.filter(t => t.tanggal >= cutoffString);
 
-            // Hitung Total Pemasukan dan Pengeluaran (30 Hari Terakhir)
             const totalInLast30 = transactionsLast30Days.filter(t => t.tipe === 'pemasukan').reduce((a, b) => a + Number(b.nominal), 0);
             const totalOutLast30 = transactionsLast30Days.filter(t => t.tipe === 'pengeluaran').reduce((a, b) => a + Number(b.nominal), 0);
 
@@ -1114,7 +1161,6 @@
             if(!error) { closeEditModal(); loadData(); }
         }
 
-        // FUNGSI TRANSFER (Fungsi Baru)
         function openTransferModal() { document.getElementById('transfer-modal').style.display = 'flex'; }
         function closeTransferModal() { document.getElementById('transfer-modal').style.display = 'none'; }
         async function simpanTransfer() {
@@ -1130,12 +1176,10 @@
             const sync = document.getElementById('sync-status');
             sync.style.display = 'block';
 
-            // Catat Pengeluaran dari sumber asal
             const txFrom = { 
                 username: user, tipe: 'pengeluaran', source: from, nominal: amt, 
                 keterangan: `Pindah Saldo ke ${to}`, tanggal: date, tanggal_pembuatan: now 
             };
-            // Catat Pemasukan ke sumber tujuan
             const txTo = { 
                 username: user, tipe: 'pemasukan', source: to, nominal: amt, 
                 keterangan: `Terima Saldo dari ${from}`, tanggal: date, tanggal_pembuatan: now 
@@ -1210,7 +1254,6 @@
             }
         }
 
-        // FUNGSI BARU: DOWNLOAD LAPORAN BULANAN (PDF)
         async function downloadMonthlyReport() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -1221,7 +1264,6 @@
             const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
             const currentMonthName = monthNames[currentMonth];
 
-            // Filter data khusus bulan ini
             const thisMonthData = allTransactions.filter(t => {
                 const d = new Date(t.tanggal);
                 return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
@@ -1235,7 +1277,6 @@
                 return;
             }
 
-            // Header PDF
             doc.setFontSize(18);
             doc.setTextColor(56, 189, 248);
             doc.text("Laporan Keuangan MoneyTrack", 14, 20);
@@ -1245,7 +1286,6 @@
             doc.text(`Periode: ${currentMonthName} ${currentYear}`, 14, 28);
             doc.text(`User ID: ${localStorage.getItem("current_user")}`, 14, 34);
 
-            // Menyiapkan Data Tabel
             const tableData = thisMonthData.map((t, index) => [
                 index + 1,
                 t.tanggal,
@@ -1255,7 +1295,6 @@
                 `Rp ${Number(t.nominal).toLocaleString('id-ID')}`
             ]);
 
-            // Membuat Tabel
             doc.autoTable({
                 startY: 40,
                 head: [['No', 'Tanggal', 'Keterangan', 'Sumber', 'Tipe', 'Nominal']],
@@ -1266,7 +1305,6 @@
                 margin: { top: 40 }
             });
 
-            // Simpan File
             doc.save(`Laporan_MoneyTrack_${currentMonthName}_${currentYear}.pdf`);
         }
 
