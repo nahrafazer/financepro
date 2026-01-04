@@ -8,6 +8,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Library untuk PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
             --bg: #020617; 
@@ -780,6 +783,11 @@
                             <span class="info-val" id="prof-last-tx">-</span>
                         </div>
                         <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 12px;">
+                            <!-- Tombol Download Laporan (Penambahan Baru) -->
+                            <button class="btn-submit" style="background: var(--success); color: #fff;" onclick="downloadMonthlyReport()">
+                                <i data-lucide="file-text" style="width: 18px"></i> Download Laporan Bulan Ini (PDF)
+                            </button>
+                            
                             <button class="btn-submit" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border);" onclick="logout()">
                                 <i data-lucide="log-out" style="width: 18px"></i> Keluar dari Perangkat Ini
                             </button>
@@ -1159,6 +1167,66 @@
                 const last = [...allTransactions].sort((a,b) => new Date(b.tanggal)-new Date(a.tanggal))[0];
                 document.getElementById('prof-last-tx').innerText = (last.keterangan || last.source) + " (" + new Date(last.tanggal).toLocaleDateString('id-ID') + ")";
             }
+        }
+
+        // FUNGSI BARU: DOWNLOAD LAPORAN BULANAN (PDF)
+        async function downloadMonthlyReport() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const currentMonthName = monthNames[currentMonth];
+
+            // Filter data khusus bulan ini
+            const thisMonthData = allTransactions.filter(t => {
+                const d = new Date(t.tanggal);
+                return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+            }).sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+
+            if (thisMonthData.length === 0) {
+                const sync = document.getElementById('sync-status');
+                sync.innerHTML = "Tidak ada data untuk bulan ini";
+                sync.style.display = 'block';
+                setTimeout(() => { sync.style.display = 'none'; sync.innerHTML = `<i data-lucide="refresh-cw" style="width: 14px; animation: spin 2s linear infinite;"></i> Sinkronisasi...`; }, 3000);
+                return;
+            }
+
+            // Header PDF
+            doc.setFontSize(18);
+            doc.setTextColor(56, 189, 248);
+            doc.text("Laporan Keuangan MoneyTrack", 14, 20);
+            
+            doc.setFontSize(11);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Periode: ${currentMonthName} ${currentYear}`, 14, 28);
+            doc.text(`User ID: ${localStorage.getItem("current_user")}`, 14, 34);
+
+            // Menyiapkan Data Tabel
+            const tableData = thisMonthData.map((t, index) => [
+                index + 1,
+                t.tanggal,
+                t.keterangan || '-',
+                t.source || 'Cash',
+                t.tipe.toUpperCase(),
+                `Rp ${Number(t.nominal).toLocaleString('id-ID')}`
+            ]);
+
+            // Membuat Tabel
+            doc.autoTable({
+                startY: 40,
+                head: [['No', 'Tanggal', 'Keterangan', 'Sumber', 'Tipe', 'Nominal']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [56, 189, 248], textColor: [255, 255, 255], fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [245, 245, 245] },
+                margin: { top: 40 }
+            });
+
+            // Simpan File
+            doc.save(`Laporan_MoneyTrack_${currentMonthName}_${currentYear}.pdf`);
         }
 
         function logout() { localStorage.clear(); window.location.href = "login.html"; }
