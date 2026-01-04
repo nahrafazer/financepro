@@ -387,6 +387,22 @@
             
             .sidebar .brand { display: none; }
         }
+
+        /* Jam Digital Style */
+        .time-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            padding: 6px 14px;
+            border-radius: 12px;
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-top: 8px;
+            width: fit-content;
+        }
     </style>
 </head>
 <body>
@@ -566,7 +582,11 @@
         <header class="page-header">
             <div>
                 <h1 id="greeting-txt">Dashboard Finansial</h1>
-                <p id="sub-header-txt">Lacak arus kas masuk dan keluar secara real-time.</p>
+                <p id="sub-header-txt">Your Financial Assistant.</p>
+                <div class="time-badge">
+                    <i data-lucide="clock" style="width: 14px"></i>
+                    <span id="local-clock">00:00:00</span>
+                </div>
             </div>
             <div id="sync-status" style="font-size: 0.75rem; color: var(--accent); display: none;">
                 <i data-lucide="refresh-cw" style="width: 14px; animation: spin 2s linear infinite;"></i> Sinkronisasi...
@@ -808,6 +828,25 @@
         let expenseChartInstance = null;
         let allTransactions = [];
 
+        // Fitur Jam Lokasi Real-time
+        function startClock() {
+            const clockElement = document.getElementById('local-clock');
+            
+            function updateTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+                clockElement.innerText = timeString;
+            }
+            
+            updateTime();
+            setInterval(updateTime, 1000);
+        }
+
         // Fungsi toggle sidebar mobile
         function toggleSidebar(force) {
             const sidebar = document.getElementById('main-sidebar');
@@ -868,6 +907,8 @@
             document.getElementById('tanggal_input').value = today;
             document.getElementById('debt-tanggal').value = today;
             document.getElementById('transfer-tanggal').value = today;
+            
+            startClock();
             loadData();
         }
 
@@ -1235,4 +1276,3 @@
     </script>
 </body>
 </html>
-
