@@ -576,11 +576,11 @@
                 <div class="stat-value" id="total-saldo">Rp 0</div>
             </div>
             <div class="stat-card">
-                <div class="stat-meta" style="color: var(--success)"><i data-lucide="arrow-up-right" style="width: 14px"></i> Total Pemasukan</div>
+                <div class="stat-meta" style="color: var(--success)"><i data-lucide="arrow-up-right" style="width: 14px"></i> Pemasukan (30 Hari Terakhir)</div>
                 <div class="stat-value" id="total-masuk" style="color: var(--success)">Rp 0</div>
             </div>
             <div class="stat-card">
-                <div class="stat-meta" style="color: var(--danger)"><i data-lucide="arrow-down-right" style="width: 14px"></i> Total Pengeluaran</div>
+                <div class="stat-meta" style="color: var(--danger)"><i data-lucide="arrow-down-right" style="width: 14px"></i> Pengeluaran (30 Hari Terakhir)</div>
                 <div class="stat-value" id="total-keluar" style="color: var(--danger)">Rp 0</div>
             </div>
         </section>
@@ -954,13 +954,24 @@
                 });
             }
 
+            // Hitung Total Saldo (Kumulatif)
             const sumAdds = allTransactions.reduce((acc, c) => (c.tipe === 'pemasukan' || c.tipe === 'utang') ? acc + Number(c.nominal) : acc, 0);
             const sumSubs = allTransactions.reduce((acc, c) => (c.tipe === 'pengeluaran' || c.tipe === 'piutang') ? acc + Number(c.nominal) : acc, 0);
-            const totalIn = allTransactions.filter(t => t.tipe === 'pemasukan').reduce((a, b) => a + Number(b.nominal), 0);
-            const totalOut = allTransactions.filter(t => t.tipe === 'pengeluaran').reduce((a, b) => a + Number(b.nominal), 0);
 
-            document.getElementById('total-masuk').innerText = `Rp ${totalIn.toLocaleString('id-ID')}`;
-            document.getElementById('total-keluar').innerText = `Rp ${totalOut.toLocaleString('id-ID')}`;
+            // Filter data untuk 30 hari terakhir
+            const now = new Date();
+            const cutoffDate = new Date();
+            cutoffDate.setDate(now.getDate() - 30);
+            const cutoffString = cutoffDate.toISOString().split('T')[0];
+
+            const transactionsLast30Days = allTransactions.filter(t => t.tanggal >= cutoffString);
+
+            // Hitung Total Pemasukan dan Pengeluaran (30 Hari Terakhir)
+            const totalInLast30 = transactionsLast30Days.filter(t => t.tipe === 'pemasukan').reduce((a, b) => a + Number(b.nominal), 0);
+            const totalOutLast30 = transactionsLast30Days.filter(t => t.tipe === 'pengeluaran').reduce((a, b) => a + Number(b.nominal), 0);
+
+            document.getElementById('total-masuk').innerText = `Rp ${totalInLast30.toLocaleString('id-ID')}`;
+            document.getElementById('total-keluar').innerText = `Rp ${totalOutLast30.toLocaleString('id-ID')}`;
             document.getElementById('total-saldo').innerText = `Rp ${(sumAdds - sumSubs).toLocaleString('id-ID')}`;
             lucide.createIcons();
         }
