@@ -235,7 +235,7 @@
         .btn-action-edit:hover { color: var(--accent); background: rgba(56, 189, 248, 0.1); }
         .btn-action-settle:hover { color: var(--success); background: rgba(16, 185, 129, 0.1); }
 
-        #confirm-modal, #edit-modal, #settle-modal {
+        #confirm-modal, #edit-modal, #settle-modal, #transfer-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(2, 6, 23, 0.8); backdrop-filter: blur(12px);
             z-index: 1000; display: none; justify-content: center; align-items: center;
@@ -467,6 +467,51 @@
             <div class="modal-actions">
                 <button class="m-btn m-btn-cancel" onclick="closeEditModal()">Batal</button>
                 <button class="m-btn m-btn-save" onclick="simpanEdit()">Update Data</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TRANSFER MODAL (Fungsi Baru) -->
+    <div id="transfer-modal">
+        <div class="modal-card">
+            <h4 style="margin: 0 0 1.5rem; font-size: 1.25rem; font-weight: 800; color: var(--accent);">Pindahkan Saldo</h4>
+            <div class="form-item">
+                <label>Dari Sumber</label>
+                <select id="transfer-from">
+                    <option value="Cash">Tunai / Cash</option>
+                    <option value="BCA">Bank BCA</option>
+                    <option value="Mandiri">Bank Mandiri</option>
+                    <option value="BRI">Bank BRI</option>
+                    <option value="Shopeepay">Shopeepay</option>
+                    <option value="Gopay">Gopay</option>
+                    <option value="OVO">OVO</option>
+                    <option value="Dana">Dana</option>
+                </select>
+            </div>
+            <div class="form-item">
+                <label>Ke Tujuan</label>
+                <select id="transfer-to">
+                    <option value="BCA">Bank BCA</option>
+                    <option value="Cash">Tunai / Cash</option>
+                    <option value="Mandiri">Bank Mandiri</option>
+                    <option value="BRI">Bank BRI</option>
+                    <option value="Shopeepay">Shopeepay</option>
+                    <option value="Gopay">Gopay</option>
+                    <option value="OVO">OVO</option>
+                    <option value="Dana">Dana</option>
+                </select>
+            </div>
+            <div class="form-item">
+                <label>Nominal (IDR)</label>
+                <input type="number" id="transfer-nominal" placeholder="Contoh: 50000">
+            </div>
+            <div class="form-item">
+                <label>Tanggal</label>
+                <input type="date" id="transfer-tanggal">
+            </div>
+            <div class="modal-actions">
+                <button class="m-btn m-btn-cancel" onclick="closeTransferModal()">Batal</button>
+                <button class="m-btn m-btn-save" onclick="simpanTransfer()">Lakukan Transfer</button>
             </div>
         </div>
     </div>
@@ -814,6 +859,7 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('tanggal_input').value = today;
             document.getElementById('debt-tanggal').value = today;
+            document.getElementById('transfer-tanggal').value = today;
             loadData();
         }
 
@@ -848,6 +894,25 @@
         function renderBalances(data) {
             const container = document.getElementById('source-balance-container');
             container.innerHTML = "";
+
+            // Menambahkan Kartu Transfer sebagai elemen aksi pertama agar bentuknya sama dengan saldo
+            const transferCard = document.createElement('div');
+            transferCard.className = "balance-card";
+            transferCard.style.cursor = "pointer";
+            transferCard.style.borderStyle = "dashed";
+            transferCard.style.justifyContent = "center";
+            transferCard.style.alignItems = "center";
+            transferCard.style.background = "rgba(245, 158, 11, 0.05)";
+            transferCard.style.borderColor = "rgba(245, 158, 11, 0.3)";
+            transferCard.onclick = openTransferModal;
+            transferCard.innerHTML = `
+                <div style="text-align: center; color: var(--warning);">
+                    <i data-lucide="repeat" style="width: 28px; height: 28px; margin-bottom: 8px;"></i>
+                    <div class="balance-title" style="color: var(--warning); letter-spacing: 1px;">Pindahkan Saldo</div>
+                </div>
+            `;
+            container.appendChild(transferCard);
+
             const balances = {};
             data.forEach(item => {
                 const src = item.source || 'Cash';
@@ -862,6 +927,7 @@
                 card.innerHTML = `<div class="balance-title">${name}</div><div class="balance-amount" style="color: ${balances[name] < 0 ? 'var(--danger)' : '#fff'}">Rp ${balances[name].toLocaleString('id-ID')}</div>`;
                 container.appendChild(card);
             });
+            lucide.createIcons();
         }
 
         function getTime(item) {
@@ -986,6 +1052,43 @@
             };
             const { error } = await supabaseClient.from('moneytrack').update(payload).eq('id', id);
             if(!error) { closeEditModal(); loadData(); }
+        }
+
+        // FUNGSI TRANSFER (Fungsi Baru)
+        function openTransferModal() { document.getElementById('transfer-modal').style.display = 'flex'; }
+        function closeTransferModal() { document.getElementById('transfer-modal').style.display = 'none'; }
+        async function simpanTransfer() {
+            const user = localStorage.getItem("current_user");
+            const from = document.getElementById('transfer-from').value;
+            const to = document.getElementById('transfer-to').value;
+            const amt = document.getElementById('transfer-nominal').value;
+            const date = document.getElementById('transfer-tanggal').value;
+            const now = new Date().toISOString();
+
+            if (!amt || amt <= 0 || from === to || !date) return;
+
+            const sync = document.getElementById('sync-status');
+            sync.style.display = 'block';
+
+            // Catat Pengeluaran dari sumber asal
+            const txFrom = { 
+                username: user, tipe: 'pengeluaran', source: from, nominal: amt, 
+                keterangan: `Pindah Saldo ke ${to}`, tanggal: date, tanggal_pembuatan: now 
+            };
+            // Catat Pemasukan ke sumber tujuan
+            const txTo = { 
+                username: user, tipe: 'pemasukan', source: to, nominal: amt, 
+                keterangan: `Terima Saldo dari ${from}`, tanggal: date, tanggal_pembuatan: now 
+            };
+
+            const { error } = await supabaseClient.from('moneytrack').insert([txFrom, txTo]);
+            
+            sync.style.display = 'none';
+            if (!error) {
+                closeTransferModal();
+                document.getElementById('transfer-nominal').value = "";
+                loadData();
+            }
         }
 
         function openDelModal(id) { targetIdForAction = id; document.getElementById('confirm-modal').style.display = 'flex'; }
