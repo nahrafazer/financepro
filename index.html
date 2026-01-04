@@ -855,7 +855,7 @@
         function initApp() {
             const user = localStorage.getItem("current_user");
             const loginAt = localStorage.getItem("login_timestamp");
-            if (!user || !loginAt || (Date.now() - parseInt(loginAt) > 2 * 24 * 60 * 60 * 1000)) return logout();
+            if (!user || !loginAt || (Date.now() - parseInt(loginAt) > 30 * 24 * 60 * 60 * 1000)) return logout();
 
             document.getElementById('user-display').innerText = user.toUpperCase();
             const d = new Date(parseInt(loginAt));
@@ -1235,3 +1235,4 @@
     </script>
 </body>
 </html>
+
